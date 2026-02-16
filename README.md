@@ -59,19 +59,6 @@ bun run dev
 
 On macOS, you'll need to grant **Accessibility** permission for Fix My Wording to simulate keyboard shortcuts (copy/paste). Go to **System Settings → Privacy & Security → Accessibility** and enable the app.
 
-## Configuration
-
-Settings are stored at:
-- **macOS**: `~/.config/fixmywording/config.json`
-- **Windows**: `%APPDATA%/fixmywording/config.json`
-- **Linux**: `~/.config/fixmywording/config.json`
-
-| Setting | Description | Default |
-|---------|-------------|---------|
-| `api_key` | Your Anthropic API key | — |
-| `model` | Claude model to use | `claude-sonnet-4-5-20250929` |
-| `system_prompt` | Instructions for how text should be improved | Refine, fix grammar, improve clarity |
-
 ## Architecture
 
 Tauri 2 app with a Rust backend and vanilla JS frontend.
