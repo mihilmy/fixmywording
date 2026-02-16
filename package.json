@@ -1,0 +1,13 @@
+{
+  "name": "fixmywording",
+  "version": "0.1.0",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@tauri-apps/cli": "^2"
+  }
+}

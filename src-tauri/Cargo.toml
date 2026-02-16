@@ -1,0 +1,29 @@
+[package]
+name = "fixmywording"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "fixmywording_lib"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[[bin]]
+name = "fixmywording"
+path = "src/main.rs"
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "image-png"] }
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-clipboard-manager = "2"
+tauri-plugin-shell = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+reqwest = { version = "0.12", features = ["json"] }
+tokio = { version = "1", features = ["full"] }
+enigo = "0.6"
+dirs = "6"
+log = "0.4"
+tauri-plugin-log = "2"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }

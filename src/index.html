@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fix My Wording Settings</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-background: hsl(240 10% 3.9%);
+      --color-foreground: hsl(0 0% 98%);
+      --color-card: hsl(240 10% 3.9%);
+      --color-card-foreground: hsl(0 0% 98%);
+      --color-muted: hsl(240 3.7% 15.9%);
+      --color-muted-foreground: hsl(240 5% 64.9%);
+      --color-border: hsl(240 3.7% 15.9%);
+      --color-input: hsl(240 3.7% 15.9%);
+      --color-ring: hsl(240 4.9% 83.9%);
+      --color-primary: hsl(0 0% 98%);
+      --color-primary-foreground: hsl(240 5.9% 10%);
+      --color-secondary: hsl(240 3.7% 15.9%);
+      --color-secondary-foreground: hsl(0 0% 98%);
+      --color-accent: hsl(240 3.7% 15.9%);
+      --color-accent-foreground: hsl(0 0% 98%);
+      --color-destructive: hsl(0 62.8% 30.6%);
+
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'SF Mono', 'JetBrains Mono', monospace;
+    }
+
+    * { -webkit-font-smoothing: antialiased; }
+
+    body {
+      background: var(--color-background);
+      font-family: var(--font-sans);
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    select option {
+      background: hsl(240 10% 8%);
+      color: hsl(0 0% 98%);
+    }
+
+    textarea::-webkit-scrollbar { width: 6px; }
+    textarea::-webkit-scrollbar-track { background: transparent; }
+    textarea::-webkit-scrollbar-thumb { background: hsl(240 3.7% 25%); border-radius: 3px; }
+
+
+    .fade-in { animation: fadeIn 0.15s ease-out; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-2px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .toast-enter { animation: toastIn 0.2s ease-out; }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .toast-exit { animation: toastOut 0.15s ease-in forwards; }
+    @keyframes toastOut {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(8px); }
+    }
+  </style>
+</head>
+<body class="min-h-screen text-foreground">
+  <!-- Draggable title bar area -->
+  <div id="titlebar" class="h-12 w-full fixed top-0 left-0 z-50 cursor-default"></div>
+
+  <div class="max-w-lg mx-auto px-8 pt-16 pb-10 fade-in">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-lg font-semibold tracking-tighter text-white mb-1.5">Fix My Wording</h1>
+      <p class="text-[13px] text-muted-foreground">your words, but better</p>
+    </div>
+
+    <!-- Settings Form -->
+    <div class="space-y-5">
+      <!-- API Key -->
+      <div class="space-y-2">
+        <label for="api-key" class="text-[13px] font-medium text-foreground">
+          API Key
+        </label>
+        <input
+          type="password"
+          id="api-key"
+          placeholder="sk-ant-api03-..."
+          autocomplete="off"
+          spellcheck="false"
+          class="flex h-9 w-full rounded-md border border-border bg-transparent px-3 py-1 text-[13px] text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+        />
+        <p class="text-[11px] text-muted-foreground">Your Anthropic API key. Stored locally.</p>
+      </div>
+
+      <!-- Model -->
+      <div class="space-y-2">
+        <label for="model" class="text-[13px] font-medium text-foreground">
+          Model
+        </label>
+        <div class="relative">
+          <select
+            id="model"
+            class="flex h-9 w-full appearance-none rounded-md border border-border bg-transparent px-3 py-1 text-[13px] text-foreground shadow-sm transition-colors focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
+          >
+            <option value="claude-sonnet-4-5-20250929">Claude Sonnet 4.5</option>
+            <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5</option>
+          </select>
+          <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- System Prompt -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <label for="system-prompt" class="text-[13px] font-medium text-foreground">
+            System Prompt
+          </label>
+          <button
+            type="button"
+            id="reset-prompt"
+            class="text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Reset
+          </button>
+        </div>
+        <textarea
+          id="system-prompt"
+          rows="3"
+          class="flex w-full rounded-md border border-border bg-transparent px-3 py-2 text-[13px] text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none leading-relaxed"
+        ></textarea>
+        <p class="text-[11px] text-muted-foreground">Instructions sent to the model with your selected text.</p>
+      </div>
+
+      <!-- Separator -->
+      <div class="border-t border-border"></div>
+
+      <!-- Shortcuts Display -->
+      <div class="space-y-3 py-1">
+        <div class="flex items-center justify-between">
+          <span class="text-[13px] text-muted-foreground">Improve text</span>
+          <div class="flex items-center gap-1">
+            <kbd class="inline-flex h-5 items-center rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">&#8984;</kbd>
+            <kbd class="inline-flex h-5 items-center rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">&#8679;</kbd>
+            <kbd class="inline-flex h-5 items-center rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">K</kbd>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 hidden">
+    <div class="flex items-center gap-2 rounded-md border border-border bg-card px-4 py-2.5 shadow-lg">
+      <svg id="toast-icon-success" class="h-3.5 w-3.5 text-emerald-500 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 6 9 17l-5-5"/>
+      </svg>
+      <svg id="toast-icon-error" class="h-3.5 w-3.5 text-red-500 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+      </svg>
+      <span id="toast-message" class="text-[13px] text-foreground"></span>
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>

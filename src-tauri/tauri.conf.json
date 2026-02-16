@@ -1,0 +1,32 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicosql/tauri-v2-schema/main/tauri.conf.schema.json",
+  "productName": "Fix My Wording",
+  "version": "0.1.0",
+  "identifier": "com.fixmywording.dev",
+  "build": {
+    "frontendDist": "../src",
+    "beforeDevCommand": "",
+    "beforeBuildCommand": ""
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "macOS": {
+      "minimumSystemVersion": "10.15"
+    }
+  }
+}
