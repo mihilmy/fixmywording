@@ -10,8 +10,6 @@ Fix My Wording is a lightweight desktop app that lives in your system tray. It u
 2. Press `Cmd+Shift+K` (macOS) or `Ctrl+Shift+K` (Windows/Linux)
 3. The selected text is replaced with an improved version
 
-That's it. No context switching, no browser tabs, no copy-pasting into a chat window.
-
 ## Features
 
 - **Global hotkey** — works in any app, any text field
@@ -28,7 +26,7 @@ That's it. No context switching, no browser tabs, no copy-pasting into a chat wi
 
 - [Bun](https://bun.sh) (or Node.js)
 - [Rust](https://rustup.rs)
-- An [Anthropic API key](https://console.anthropic.com/)
+- [Anthropic API key](https://console.claude.com/)
 
 ### Build from Source
 
