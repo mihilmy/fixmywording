@@ -47,8 +47,21 @@ static ICON_DIM: &[u8] = include_bytes!("../icons/icon_processing.png");
 static PULSING: AtomicBool = AtomicBool::new(false);
 
 pub fn handle_hotkey(app: &tauri::AppHandle) {
+    spawn_improve(app, Duration::ZERO);
+}
+
+/// Triggered from the tray menu — needs a short delay so the menu dismisses
+/// and focus returns to the previous app before we simulate Cmd+C.
+pub fn handle_hotkey_from_menu(app: &tauri::AppHandle) {
+    spawn_improve(app, Duration::from_millis(200));
+}
+
+fn spawn_improve(app: &tauri::AppHandle, pre_delay: Duration) {
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
+        if !pre_delay.is_zero() {
+            tokio::time::sleep(pre_delay).await;
+        }
         start_pulse(&app);
         let result = process_selection(&app).await;
         stop_pulse(&app);
@@ -137,7 +150,15 @@ async fn process_selection(app: &tauri::AppHandle) -> Result<(), String> {
         cfg.model, key_preview, truncate(&cfg.system_prompt, 80)
     );
     info!("calling AI...");
-    let improved = ai::improve_text(&selected_text, &cfg).await?;
+    let improved = match ai::improve_text(&selected_text, &cfg).await {
+        Ok(t) => t,
+        Err(e) => {
+            // Restore clipboard before bailing — otherwise the next hotkey press
+            // sees original_clipboard == selected_text and wrongly reports "No text selected".
+            app.clipboard().write_text(&original_clipboard).ok();
+            return Err(e);
+        }
+    };
     debug!("AI response: {:?}", truncate(&improved, 200));
 
     // Save last result for "Copy Last Result" tray menu

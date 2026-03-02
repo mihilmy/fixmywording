@@ -55,6 +55,10 @@ pub fn run() {
         .setup(|app| {
             info!("=== Fix My Wording started ===");
 
+            // Hide from dock — run as menu bar only app
+            #[cfg(target_os = "macos")]
+            app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+
             // Initialize enigo state (will retry lazily if permissions aren't granted yet)
             app.manage(hotkey::EnigoState::new());
 
@@ -62,10 +66,14 @@ pub fn run() {
             app.manage(LastResult(Mutex::new(None)));
 
             // Build tray menu
+            let fix_text_item = MenuItemBuilder::with_id("fix_text", "Fix Selected Text")
+                .accelerator("CmdOrCtrl+Shift+K")
+                .build(app)?;
             let copy_last_item = MenuItemBuilder::with_id("copy_last", "Copy Last Result").build(app)?;
             let settings_item = MenuItemBuilder::with_id("settings", "Settings").build(app)?;
             let quit_item = MenuItemBuilder::with_id("quit", "Quit Fix My Wording").build(app)?;
             let menu = MenuBuilder::new(app)
+                .item(&fix_text_item)
                 .item(&copy_last_item)
                 .separator()
                 .item(&settings_item)
@@ -81,6 +89,10 @@ pub fn run() {
                 .menu(&menu)
                 .tooltip("Fix My Wording — your words, but better")
                 .on_menu_event(|app, event| match event.id().as_ref() {
+                    "fix_text" => {
+                        info!("Tray menu: Fix Selected Text");
+                        hotkey::handle_hotkey_from_menu(app);
+                    }
                     "copy_last" => {
                         if let Some(state) = app.try_state::<LastResult>() {
                             if let Ok(guard) = state.0.lock() {
@@ -118,6 +130,12 @@ pub fn run() {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                 api.prevent_close();
                 window.hide().ok();
+                // Hide from dock when settings window is closed
+                #[cfg(target_os = "macos")]
+                window
+                    .app_handle()
+                    .set_activation_policy(tauri::ActivationPolicy::Accessory)
+                    .ok();
             }
         })
         .run(tauri::generate_context!())
@@ -125,6 +143,10 @@ pub fn run() {
 }
 
 fn open_settings(app: &tauri::AppHandle) {
+    // Show in dock when settings window is open
+    #[cfg(target_os = "macos")]
+    app.set_activation_policy(tauri::ActivationPolicy::Regular).ok();
+
     if let Some(window) = app.get_webview_window("settings") {
         window.show().ok();
         window.set_focus().ok();
