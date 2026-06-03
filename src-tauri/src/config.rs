@@ -2,8 +2,15 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 
+fn default_auth_mode() -> String {
+    "ant".to_string()
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AppConfig {
+    /// "ant" — OAuth via the Anthropic CLI (`ant auth login`); "api_key" — static key.
+    #[serde(default = "default_auth_mode")]
+    pub auth_mode: String,
     pub api_key: String,
     pub model: String,
     pub system_prompt: String,
@@ -12,6 +19,7 @@ pub struct AppConfig {
 impl Default for AppConfig {
     fn default() -> Self {
         Self {
+            auth_mode: default_auth_mode(),
             api_key: String::new(),
             model: "claude-sonnet-4-5-20250929".to_string(),
             system_prompt: "Make the text more refined, assertive, and articulate. Fix grammar, improve clarity, and elevate the tone. Never water down the user's point.".to_string(),

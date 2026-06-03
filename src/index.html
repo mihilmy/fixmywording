@@ -79,8 +79,28 @@
 
     <!-- Settings Form -->
     <div class="space-y-5">
-      <!-- API Key -->
+      <!-- Auth Mode -->
       <div class="space-y-2">
+        <label for="auth-mode" class="text-[13px] font-medium text-foreground">
+          Authentication
+        </label>
+        <div class="relative">
+          <select
+            id="auth-mode"
+            class="flex h-9 w-full appearance-none rounded-md border border-border bg-transparent px-3 py-1 text-[13px] text-foreground shadow-sm transition-colors focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
+          >
+            <option value="ant">Anthropic CLI (ant auth login)</option>
+            <option value="api_key">API Key</option>
+          </select>
+          <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </div>
+        <p id="auth-status" class="text-[11px] text-muted-foreground"></p>
+      </div>
+
+      <!-- API Key -->
+      <div class="space-y-2 hidden" id="api-key-section">
         <label for="api-key" class="text-[13px] font-medium text-foreground">
           API Key
         </label>

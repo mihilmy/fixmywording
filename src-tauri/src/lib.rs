@@ -1,4 +1,5 @@
 mod ai;
+mod auth;
 mod config;
 mod hotkey;
 
@@ -33,6 +34,14 @@ fn get_default_config() -> AppConfig {
     AppConfig::default()
 }
 
+/// Returns the logged-in account email when the ant CLI has valid credentials.
+#[tauri::command]
+async fn check_auth() -> Result<String, String> {
+    tauri::async_runtime::spawn_blocking(auth::auth_status)
+        .await
+        .map_err(|e| e.to_string())?
+}
+
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_clipboard_manager::init())
@@ -51,7 +60,7 @@ pub fn run() {
                 ])
                 .build(),
         )
-        .invoke_handler(tauri::generate_handler![get_config, save_config, get_default_config])
+        .invoke_handler(tauri::generate_handler![get_config, save_config, get_default_config, check_auth])
         .setup(|app| {
             info!("=== Fix My Wording started ===");
 

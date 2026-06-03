@@ -1,6 +1,9 @@
 const { invoke } = window.__TAURI__.core;
 const { getCurrentWindow } = window.__TAURI__.window;
 
+const authModeSelect = document.getElementById("auth-mode");
+const authStatus = document.getElementById("auth-status");
+const apiKeySection = document.getElementById("api-key-section");
 const apiKeyInput = document.getElementById("api-key");
 const modelSelect = document.getElementById("model");
 const systemPromptInput = document.getElementById("system-prompt");
@@ -19,6 +22,7 @@ function autoSave() {
     try {
       await invoke("save_config", {
         config: {
+          auth_mode: authModeSelect.value,
           api_key: apiKeyInput.value.trim(),
           model: modelSelect.value,
           system_prompt: systemPromptInput.value.trim(),
@@ -31,6 +35,30 @@ function autoSave() {
   }, 500);
 }
 
+function updateAuthUI() {
+  const isApiKey = authModeSelect.value === "api_key";
+  apiKeySection.classList.toggle("hidden", isApiKey === false);
+  authStatus.textContent = "";
+  if (!isApiKey) refreshAuthStatus();
+}
+
+async function refreshAuthStatus() {
+  authStatus.textContent = "Checking login…";
+  try {
+    const email = await invoke("check_auth");
+    authStatus.textContent = `Logged in as ${email}`;
+    authStatus.classList.remove("text-red-400");
+  } catch (err) {
+    authStatus.textContent = String(err);
+    authStatus.classList.add("text-red-400");
+  }
+}
+
+authModeSelect.addEventListener("change", () => {
+  updateAuthUI();
+  autoSave();
+});
+
 apiKeyInput.addEventListener("input", autoSave);
 modelSelect.addEventListener("change", autoSave);
 systemPromptInput.addEventListener("input", autoSave);
@@ -39,7 +67,9 @@ systemPromptInput.addEventListener("input", autoSave);
 async function loadSettings() {
   try {
     const config = await invoke("get_config");
+    authModeSelect.value = config.auth_mode || "ant";
     apiKeyInput.value = config.api_key || "";
+    updateAuthUI();
     modelSelect.value = config.model || "claude-sonnet-4-5-20250929";
     systemPromptInput.value = config.system_prompt || "";
   } catch (e) {

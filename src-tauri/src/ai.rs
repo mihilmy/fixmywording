@@ -28,11 +28,23 @@ struct AnthropicResponse {
     content: Vec<ContentBlock>,
 }
 
-pub async fn improve_text(text: &str, config: &AppConfig) -> Result<String, String> {
-    if config.api_key.is_empty() {
-        return Err("API key not set. Open Fix My Wording settings to configure.".to_string());
-    }
+enum Auth {
+    ApiKey(String),
+    Bearer(String),
+}
 
+async fn resolve_auth(config: &AppConfig) -> Result<Auth, String> {
+    if config.auth_mode == "api_key" {
+        if config.api_key.is_empty() {
+            return Err("API key not set. Open Fix My Wording settings to configure.".to_string());
+        }
+        Ok(Auth::ApiKey(config.api_key.clone()))
+    } else {
+        Ok(Auth::Bearer(crate::auth::get_access_token().await?))
+    }
+}
+
+pub async fn improve_text(text: &str, config: &AppConfig) -> Result<String, String> {
     let system = format!(
         "{PREAMBLE}\n\n{}\n\nIMPORTANT: You MUST wrap your entire response in <result></result> XML tags. Output NOTHING outside these tags.",
         config.system_prompt
@@ -49,15 +61,16 @@ pub async fn improve_text(text: &str, config: &AppConfig) -> Result<String, Stri
         }],
     };
 
-    let resp = client
-        .post("https://api.anthropic.com/v1/messages")
-        .header("x-api-key", &config.api_key)
-        .header("anthropic-version", "2023-06-01")
-        .header("content-type", "application/json")
-        .json(&body)
-        .send()
-        .await
-        .map_err(|e| format!("Request failed: {e}"))?;
+    let mut auth = resolve_auth(config).await?;
+    let mut resp = send_request(&client, &body, &auth).await?;
+
+    // A 401 in OAuth mode usually means the cached token was revoked early —
+    // drop it and retry once with a freshly minted one.
+    if resp.status() == reqwest::StatusCode::UNAUTHORIZED && matches!(auth, Auth::Bearer(_)) {
+        crate::auth::invalidate_token();
+        auth = resolve_auth(config).await?;
+        resp = send_request(&client, &body, &auth).await?;
+    }
 
     if !resp.status().is_success() {
         let status = resp.status();
@@ -74,6 +87,23 @@ pub async fn improve_text(text: &str, config: &AppConfig) -> Result<String, Stri
         .ok_or_else(|| "Empty response from API".to_string())?;
 
     extract_result(&raw).ok_or_else(|| format!("No <result> tag found in response: {raw}"))
+}
+
+async fn send_request(
+    client: &Client,
+    body: &AnthropicRequest,
+    auth: &Auth,
+) -> Result<reqwest::Response, String> {
+    let req = client
+        .post("https://api.anthropic.com/v1/messages")
+        .header("anthropic-version", "2023-06-01")
+        .header("content-type", "application/json")
+        .json(body);
+    let req = match auth {
+        Auth::ApiKey(key) => req.header("x-api-key", key),
+        Auth::Bearer(token) => req.header("authorization", format!("Bearer {token}")),
+    };
+    req.send().await.map_err(|e| format!("Request failed: {e}"))
 }
 
 fn extract_result(text: &str) -> Option<String> {
